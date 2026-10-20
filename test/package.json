@@ -1,0 +1,8 @@
+{
+  "name": "viciontrp-tests",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "mineflayer": "^4.27.0"
+  }
+}

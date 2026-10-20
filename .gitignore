@@ -1,0 +1,6 @@
+target/
+.idea/
+*.iml
+test/node_modules/
+test/package-lock.json
+server-*.log

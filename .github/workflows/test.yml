@@ -1,0 +1,60 @@
+name: Probar ViciontRP
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - run: mvn -B -ntp package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin
+          path: target/ViciontRP-*.jar
+
+  server:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mc: '1.21.4'
+            java: '21'
+            mode: bot
+          - mc: '26.2'
+            java: '25'
+            mode: load
+    name: Paper ${{ matrix.mc }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: plugin
+          path: target
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: bash test/server.sh ${{ matrix.mc }} ${{ matrix.mode }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-${{ matrix.mc }}
+          path: server-*.log
+          if-no-files-found: ignore

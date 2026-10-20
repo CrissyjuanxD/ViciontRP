@@ -1,0 +1,32 @@
+name: Publicar versión
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Comprobar la versión
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          pom="$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout)"
+          [ "$v" = "$pom" ] || { echo "La etiqueta $GITHUB_REF_NAME no coincide con pom.xml ($pom)"; exit 1; }
+          [ -f "docs/releases/$v.md" ] || { echo "Faltan las notas docs/releases/$v.md"; exit 1; }
+      - run: mvn -B -ntp package
+      - name: Crear la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" "target/ViciontRP-$v.jar" --title "ViciontRP $v" --notes-file "docs/releases/$v.md"

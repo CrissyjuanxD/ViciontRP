@@ -1,0 +1,45 @@
+# ViciontRP · pack de recursos de tu instancia de Viciont Studios Launcher
+#
+# Quien entra desde el launcher con la instancia al día ya tiene el pack: no se le pide nada.
+# Quien entra sin el launcher (o con la instancia sin actualizar) recibe el pack al entrar.
+# Cuando publicas una versión nueva con el pack cambiado, el plugin lo nota solo.
+
+# Clave del plugin. Créala en el launcher: Administrar instancias → tu instancia → Contenido →
+# «Pack del servidor de Minecraft» → Crear clave. Después escribe /viciontrp reload.
+key: ""
+
+# Servidor de Viciont Studios. No lo cambies.
+api: "https://viciont-launcher.pepoavilesg26.workers.dev"
+
+# Enlace que sale en los mensajes como {link}.
+launcher-link: "https://viciontstudios.pages.dev/#launcher"
+
+# true: el pack es obligatorio. El jugador solo puede aceptarlo o desconectarse.
+required: true
+
+# Si cambias el pack mientras hay gente jugando sin el launcher, se lo manda al momento.
+update-online-players: true
+
+# Cada cuántos segundos mira si hay un pack nuevo (mínimo 15).
+refresh-seconds: 60
+
+# Espera (en ticks, 20 = 1 segundo) entre que el jugador entra y se le manda el pack.
+join-delay-ticks: 20
+
+# Mensajes. Colores con & (por ejemplo &6, &b, &l). Se pueden usar varias líneas.
+# {instance} = nombre de la instancia, {link} = launcher-link, {player} = nick del jugador.
+messages:
+  # Lo que sale en la pantalla del pack, encima de los botones.
+  prompt: |-
+    &6Este servidor usa un paquete de recursos propio de &e{instance}&6.
+    &7Para jugar sin descargas, usa el launcher de Viciont Studios: &b{link}
+  # Si no lo acepta (con required: true).
+  declined: |-
+    &cNecesitas el paquete de recursos de {instance} para jugar aquí.
+    &7O juega con el launcher de Viciont Studios: &b{link}
+  # Si no se pudo descargar o cargar.
+  failed: |-
+    &cNo se pudo cargar el paquete de recursos. Vuelve a entrar.
+    &7O juega con el launcher de Viciont Studios: &b{link}
+  # En el chat, cuando ya lo tiene cargado. Déjalo vacío ("") para no mandar nada.
+  chat: "&7¿Quieres jugar sin esperar descargas? Usa el launcher de Viciont Studios: &b{link}"
