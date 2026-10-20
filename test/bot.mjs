@@ -21,6 +21,11 @@ function join(username) {
   });
 }
 
+function answer(s, results) {
+  const uuid = s.packs[0]?.uuid;
+  for (const result of results) s.bot._client.write('resource_pack_receive', uuid ? { uuid, result } : { result });
+}
+
 async function until(fn, ms) {
   const end = Date.now() + ms;
   while (Date.now() < end) {
@@ -53,14 +58,14 @@ const p = normal.packs[0] || {};
 check(/\/v1\/rp\/prueba\/[a-f0-9]{40}\.zip$/.test(p.url || ''), `el enlace es el del pack (${p.url})`);
 check(p.forced === true, 'el pack es obligatorio');
 check(text(p.promptMessage ?? p.prompt ?? '').includes('Croissants de Prueba'), 'el mensaje lleva el nombre de la instancia');
-normal.bot.acceptResourcePack();
+answer(normal, [3, 4, 0]);
 check(await until(() => normal.messages.some((m) => m.includes('launcher')), 8000), 'al cargarlo recibe el mensaje del chat con el enlace');
 normal.bot.quit();
 await wait(1500);
 
 const no = await join('Jugador_Rechaza');
 await until(() => no.packs.length > 0, 10000);
-no.bot.denyResourcePack();
+answer(no, [1]);
 check(await until(() => no.kicked || no.ended, 8000), 'quien lo rechaza sale del servidor');
 check(String(no.kicked || '').includes('Necesitas'), `con el mensaje de config.yml (${no.kicked})`);
 
