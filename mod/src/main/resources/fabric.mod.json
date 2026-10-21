@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "viciontrp",
+  "version": "${version}",
+  "name": "ViciontRP",
+  "description": "Actualiza los packs de recursos de tu instancia de Viciont Studios Launcher sin salir del servidor.",
+  "authors": ["CrissyjuanxD"],
+  "contact": {
+    "homepage": "https://viciontstudios.pages.dev/#launcher",
+    "sources": "https://github.com/CrissyjuanxD/ViciontRP"
+  },
+  "license": "LicenseRef-ViciontRP",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.viciontstudios.rp.mod.ViciontRPMod"]
+  },
+  "mixins": ["viciontrp.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "${mc_range}",
+    "java": ">=${java}",
+    "fabric-networking-api-v1": "*"
+  }
+}

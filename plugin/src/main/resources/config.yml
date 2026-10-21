@@ -1,0 +1,67 @@
+# ViciontRP · packs de recursos de tu instancia de Viciont Studios Launcher
+#
+# Quien entra desde el launcher con la instancia al día ya tiene los packs: no se le pide nada.
+# Quien entra sin el launcher (o con la instancia sin actualizar) recibe los packs del servidor al entrar.
+# Cuando publicas una versión con los packs cambiados, el plugin lo nota solo y se lo manda también
+# a quien ya está jugando: con el mod ViciontRP (lo pone el launcher) se le actualiza la carpeta de
+# resourcepacks sin salir del servidor, y a los demás les llega el pack del servidor.
+
+# Clave del plugin. Créala en el launcher: Administrar instancias → tu instancia → Contenido →
+# «Pack del servidor de Minecraft» → Crear clave. Después escribe /viciontrp reload.
+key: ""
+
+# Servidor de Viciont Studios. No lo cambies.
+api: "https://viciont-launcher.pepoavilesg26.workers.dev"
+
+# Enlace que sale en los mensajes como {link}.
+launcher-link: "https://viciontstudios.pages.dev/#launcher"
+
+# Quién puede entrar:
+#   everyone: con o sin el launcher. A quien no tiene el launcher se le manda el pack del servidor.
+#   launcher-only: solo desde Viciont Studios Launcher. A los demás se les echa con el mensaje «launcher-only».
+access: everyone
+
+# Cuándo se actualizan los recursos de quien ya está jugando:
+#   automatic: en cuanto publicas una versión con los packs cambiados (después del aviso).
+#   manual: cuando escribes /viciontrp actualizar (por ejemplo, al acabar una cuenta atrás de otro plugin).
+# Quien entra nuevo siempre recibe los recursos de la última versión publicada.
+update-mode: automatic
+
+# Segundos de aviso en el chat antes de actualizar los recursos (0 = sin aviso).
+warning-seconds: 30
+
+# true: el pack es obligatorio. El jugador solo puede aceptarlo o desconectarse.
+required: true
+
+# Cada cuántos segundos mira si hay recursos nuevos (mínimo 15).
+refresh-seconds: 60
+
+# Espera (en ticks, 20 = 1 segundo) entre que el jugador entra y se le manda el pack.
+join-delay-ticks: 20
+
+# Mensajes. Colores con & (por ejemplo &6, &b, &l) o hexadecimales con &#RRGGBB (por ejemplo &#C8A2F8).
+# Se pueden usar varias líneas.
+# {instance} = nombre de la instancia, {link} = launcher-link, {player} = nick del jugador.
+messages:
+  # Lo que sale en la pantalla del pack, encima de los botones.
+  prompt: |-
+    &#C8A2F8Este servidor usa los recursos de &#F8B4D9{instance}&#C8A2F8.
+    &#A7D8F5Para jugar sin descargas, usa el launcher de Viciont Studios: &#F8B4D9{link}
+  # Si no lo acepta (con required: true).
+  declined: |-
+    &#F8B4D9Necesitas los recursos de {instance} para jugar aquí.
+    &#C8A2F8O juega con el launcher de Viciont Studios: &#A7D8F5{link}
+  # Si no se pudo descargar o cargar.
+  failed: |-
+    &#F8B4D9No se pudieron cargar los recursos. Vuelve a entrar.
+    &#C8A2F8O juega con el launcher de Viciont Studios: &#A7D8F5{link}
+  # En el chat, cuando ya lo tiene cargado. Déjalo vacío ("") para no mandar nada.
+  chat: "&#C8A2F8¿Quieres jugar sin esperar descargas? Usa el launcher de Viciont Studios: &#F8B4D9{link}"
+  # En el chat, antes de actualizar los recursos. {seconds} = segundos que faltan (warning-seconds).
+  warning: "&#C8A2F8Los recursos del servidor se actualizarán en &#F8B4D9{seconds} segundos&#C8A2F8."
+  # Al echar a quien no entra desde el launcher (con access: launcher-only).
+  launcher-only: |-
+    &#F8B4D9Para entrar a este servidor necesitas el launcher de Viciont Studios.
+    &#C8A2F8Descárgalo aquí: &#A7D8F5{link}
+  # A los administradores (permiso viciontrp.admin) cuando hay recursos nuevos en modo manual.
+  pending: "&#C8A2F8Hay recursos nuevos de &#F8B4D9{instance}&#C8A2F8. Escribe &#F8B4D9/viciontrp actualizar &#C8A2F8para mandarlos a todos."

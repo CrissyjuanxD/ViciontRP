@@ -3,9 +3,10 @@ set -euo pipefail
 
 MC="$1"
 MODE="$2"
+TARGET="${3:-}"
 ROOT="$(pwd)"
 DIR="$(mktemp -d)"
-JAR="$(ls "$ROOT"/target/ViciontRP-*.jar | head -1)"
+JAR="$(ls "$ROOT"/plugin/target/ViciontRP-*.jar | head -1)"
 
 url="$(curl -fsSL "https://fill.papermc.io/v3/projects/paper/versions/$MC/builds/latest" | jq -r '.downloads["server:default"].url // empty' || true)"
 if [ -z "$url" ]; then
@@ -21,7 +22,8 @@ sed -e 's|^key: ""|key: "vrp1.prueba.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"|' \
     -e 's|^api: .*|api: "http://127.0.0.1:8787"|' \
     -e 's|^refresh-seconds: .*|refresh-seconds: 15|' \
     -e 's|^join-delay-ticks: .*|join-delay-ticks: 10|' \
-    "$ROOT/src/main/resources/config.yml" > "$DIR/plugins/ViciontRP/config.yml"
+    -e 's|^warning-seconds: .*|warning-seconds: 3|' \
+    "$ROOT/plugin/src/main/resources/config.yml" > "$DIR/plugins/ViciontRP/config.yml"
 grep -q 'vrp1.prueba' "$DIR/plugins/ViciontRP/config.yml"
 echo "eula=true" > "$DIR/eula.txt"
 cat > "$DIR/server.properties" <<'EOF'
@@ -50,16 +52,18 @@ for _ in $(seq 1 360); do
 done
 grep -q 'Done (' "$DIR/server.log" || { echo "El servidor no arrancó a tiempo"; tail -50 "$DIR/server.log"; exit 1; }
 for _ in $(seq 1 30); do
-  grep -q 'Pack de Croissants de Prueba' "$DIR/server.log" && break
+  grep -q 'Packs de Croissants de Prueba' "$DIR/server.log" && break
   sleep 1
 done
 grep -i 'viciontrp' "$DIR/server.log" || true
-grep -q 'Pack de Croissants de Prueba' "$DIR/server.log" || { echo "ViciontRP no recibió el pack de la API"; exit 1; }
+grep -q 'Packs de Croissants de Prueba' "$DIR/server.log" || { echo "ViciontRP no recibió los packs de la API"; exit 1; }
 
 status=0
 if [ "$MODE" = "bot" ]; then
   (cd "$ROOT/test" && npm install --no-audit --no-fund --loglevel=error)
-  node "$ROOT/test/bot.mjs" "$DIR/calls.json" || status=$?
+  node "$ROOT/test/bot.mjs" "$DIR/calls.json" "$DIR" || status=$?
+elif [ "$MODE" = "client" ]; then
+  node "$ROOT/test/client.mjs" "$DIR" "$TARGET" || status=$?
 fi
 
 echo "stop" > "$DIR/console"
