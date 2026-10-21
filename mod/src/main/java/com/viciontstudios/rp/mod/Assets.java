@@ -27,6 +27,8 @@ final class Assets {
     static volatile Phase phase = Phase.IDLE;
     static volatile long done;
     static volatile long total;
+    static volatile long files;
+    static volatile long filesDone;
     private static volatile boolean swap;
     private static volatile String swapError;
     private static volatile int run;
@@ -50,6 +52,8 @@ final class Assets {
         phase = Phase.CHECKING;
         done = 0;
         total = 0;
+        files = 0;
+        filesDone = 0;
         LOG.info("Actualizando los assets de la instancia ({})", target);
         WORKER.execute(() -> prepare(id, target));
     }
@@ -77,6 +81,8 @@ final class Assets {
                 String state = Json.text(s, "state", "");
                 done = Json.number(s, "done");
                 total = Json.number(s, "total");
+                files = Json.number(s, "files");
+                filesDone = Json.number(s, "filesDone");
                 if (state.equals("downloading")) phase = Phase.DOWNLOADING;
                 if (state.equals("ready")) {
                     boolean replace = Json.bool(s, "replace");

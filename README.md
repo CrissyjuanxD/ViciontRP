@@ -5,7 +5,7 @@ Plugin para servidores de Minecraft (Paper, Purpur o Spigot) y mod para Fabric q
 - Quien entra **desde el launcher con la instancia al día** ya tiene los packs: no se le pregunta ni se le descarga nada.
 - Quien entra **sin el launcher** (o con la instancia sin actualizar) recibe los packs del servidor al entrar, con tu mensaje. Si son obligatorios, solo puede **aceptarlos o desconectarse**.
 - Cuando cambias los packs en el launcher y publicas una versión de la instancia, el plugin lo nota solo y avisa en el chat antes de actualizar a quien ya está jugando:
-  - **Con el launcher**: el mod ViciontRP (lo pone el launcher solo) le pide al launcher los packs nuevos. Sale abajo **«Descargando Assets»** con una barra blanca y, al llenarse, se recargan las texturas. El launcher cambia la carpeta `resourcepacks` de la instancia, así que no se duplica nada y no hace falta reiniciar.
+  - **Con el launcher**: el mod ViciontRP (lo pone el launcher solo) le pide al launcher los packs nuevos. Sale abajo **«Actualizando Assets 100% | (0/3)»** con una barra blanca y, al llenarse, se recargan las texturas. El launcher cambia la carpeta `resourcepacks` de la instancia, así que no se duplica nada y no hace falta reiniciar.
   - **Sin el launcher**: le llega el pack del servidor que cambió.
 - El servidor puede ser **solo con el launcher**: a quien entre sin él se le echa con tu mensaje.
 

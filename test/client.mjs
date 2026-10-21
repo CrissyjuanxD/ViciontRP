@@ -128,7 +128,7 @@ const bridge = http.createServer((req, res) => {
     events.push({ route, at: Date.now(), data });
     if (route === 'GET /hello') return send(200, { ok: true, launcher: 'prueba', instance: 'prueba', assets: installed, version: 1 });
     if (route === 'POST /ticket') return send(200, { ok: true, ticket: `pase-${NICK}` });
-    if (route === 'GET /assets/status') return send(200, { ok: true, ...job, replace: job.state === 'ready' });
+    if (route === 'GET /assets/status') return send(200, { ok: true, ...job, files: job.total ? 3 : 0, filesDone: job.total ? Math.floor((job.done / job.total) * 3) : 0, replace: job.state === 'ready' });
     if (route === 'POST /assets/cancel') { job.state = 'idle'; return send(200, { ok: true }); }
     if (route === 'POST /assets/prepare') {
       Object.assign(job, { state: 'checking', done: 0, total: 0, enable: [], target: data.assets });
