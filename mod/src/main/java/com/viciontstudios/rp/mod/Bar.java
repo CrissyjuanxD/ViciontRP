@@ -1,6 +1,6 @@
 package com.viciontstudios.rp.mod;
 
-public final class Hud {
+public final class Bar {
     public interface Painter {
         int width();
 
@@ -17,7 +17,7 @@ public final class Hud {
     private static final int WIDTH = 120;
     private static float shown;
 
-    private Hud() {
+    private Bar() {
     }
 
     public static boolean visible() {

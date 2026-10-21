@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
-public final class Overlay implements Hud.Painter {
+public final class Overlay implements Bar.Painter {
     private final GuiGraphicsExtractor g;
     private final Font font;
 
@@ -14,7 +14,7 @@ public final class Overlay implements Hud.Painter {
     }
 
     public static void draw(GuiGraphicsExtractor g) {
-        if (Hud.visible()) Hud.draw(new Overlay(g));
+        if (Bar.visible()) Bar.draw(new Overlay(g));
     }
 
     @Override

@@ -78,13 +78,23 @@ const pack = (description) => zip({
   'assets/minecraft/lang/es_es.json': JSON.stringify({ 'menu.singleplayer': description }),
 });
 
-function shot(name) {
+async function shot(name) {
+  const dir = path.join(RUN, 'screenshots');
+  const before = new Set(fs.existsSync(dir) ? fs.readdirSync(dir) : []);
   try {
-    fs.mkdirSync(SHOTS, { recursive: true });
-    execFileSync('import', ['-window', 'root', '-display', process.env.DISPLAY || ':99', path.join(SHOTS, `${name}.png`)], { timeout: 20000 });
+    const win = execFileSync('xdotool', ['search', '--name', 'Minecraft'], { encoding: 'utf8' }).trim().split(/\s+/).pop();
+    execFileSync('xdotool', ['windowfocus', win]);
+    execFileSync('xdotool', ['key', 'F2']);
   } catch (e) {
     console.log(`No se pudo hacer la captura ${name}: ${e.message}`);
+    return;
   }
+  const ok = await until(() => fs.existsSync(dir) && fs.readdirSync(dir).some((f) => !before.has(f)), 10000, 200);
+  if (!ok) { console.log(`La captura ${name} no apareció`); return; }
+  await wait(1000);
+  const file = fs.readdirSync(dir).find((f) => !before.has(f));
+  fs.mkdirSync(SHOTS, { recursive: true });
+  fs.copyFileSync(path.join(dir, file), path.join(SHOTS, `${name}.png`));
 }
 
 fs.rmSync(RUN, { recursive: true, force: true });
@@ -156,16 +166,16 @@ try {
   check(events.some((e) => e.route === 'GET /hello') && events.some((e) => e.route === 'POST /ticket'), 'el mod saluda al launcher y le pide el pase');
   check(/ViciontRP 1\.\d+\.\d+ listo \(con el launcher de Viciont Studios\)/.test(clientLog()), 'el mod arranca y encuentra el launcher');
   await wait(8000);
-  shot('1-dentro');
+  await shot('1-dentro');
   const next = await api('/__publish', 'POST');
   check(await until(() => events.some((e) => e.route === 'POST /assets/prepare' && e.data.assets === next.assets), 60000), 'al publicar, el mod le pide al launcher los assets nuevos');
   await until(() => job.state === 'downloading' && job.done >= job.total / 2, 30000, 100);
-  shot('2-descargando');
+  await shot('2-descargando');
   check(await until(() => events.some((e) => e.route === 'POST /assets/apply'), 180000), 'cuando termina la descarga, el mod recarga y el launcher cambia los archivos');
   const done = await until(() => serverLog().includes(`${NICK}: recursos actualizados desde el launcher.`), 240000, 1000);
   check(done, 'el mod avisa al plugin de que ya tiene los recursos nuevos');
   await wait(6000);
-  shot('3-actualizado');
+  await shot('3-actualizado');
   const log = clientLog();
   const reload = log.lastIndexOf('Reloading ResourceManager');
   const placed = log.lastIndexOf('Assets nuevos colocados');
