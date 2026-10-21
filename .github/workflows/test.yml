@@ -119,9 +119,11 @@ jobs:
       - name: Pantalla virtual
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb xdotool mesa-utils libgl1-mesa-dri libegl1 mesa-vulkan-drivers vulkan-tools libxkbcommon-x11-0 > /dev/null
+          sudo apt-get install -y -qq xvfb xdotool openbox mesa-utils libgl1-mesa-dri libegl1 mesa-vulkan-drivers vulkan-tools libxkbcommon-x11-0 > /dev/null
           Xvfb :99 -screen 0 1280x720x24 &
           sleep 2
+          openbox &
+          sleep 1
           glxinfo -B | head -20 || true
       - run: bash test/server.sh ${{ matrix.paper }} client ${{ matrix.target }}
       - if: always()

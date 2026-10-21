@@ -39,7 +39,6 @@ final class Net {
 
     private static volatile boolean greeted;
     private static volatile boolean joined;
-    private static volatile boolean listening;
     private static ServerData accepted;
     private static ServerData.ServerPackStatus before;
 
@@ -49,27 +48,20 @@ final class Net {
     static void init() {
         Channels.register(Message.TYPE, Message.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(Message.TYPE, (payload, context) -> receive(payload.json()));
-        Channels.onServerChannels(channels -> {
-            if (!channels.contains(Message.TYPE.id())) return;
-            listening = true;
-            Minecraft.getInstance().execute(Net::greet);
-        });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             joined = true;
-            if (ClientPlayNetworking.canSend(Message.TYPE)) listening = true;
             client.execute(Net::greet);
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(Net::reset));
     }
 
     private static void greet() {
-        if (joined && listening && !greeted) hello();
+        if (joined && !greeted) hello();
     }
 
     private static void reset() {
         greeted = false;
         joined = false;
-        listening = false;
         Assets.cancel();
         if (accepted != null && before != null) accepted.setResourcePackStatus(before);
         accepted = null;
@@ -92,14 +84,27 @@ final class Net {
                     m.addProperty("instance", Json.text(h, "instance", null));
                     m.addProperty("assets", Json.text(h, "assets", null));
                     m.addProperty("launcherVersion", Json.text(h, "launcher", null));
-                    JsonObject t = bridge.call("POST", "/ticket", new JsonObject(), Duration.ofSeconds(15));
-                    m.addProperty("ticket", Json.text(t, "ticket", null));
                 } catch (Exception e) {
                     Assets.LOG.warn("No se pudo hablar con el launcher: {}", e.getMessage());
                 }
             }
             m.addProperty("launcher", launcher);
             Minecraft.getInstance().execute(() -> send(m));
+        });
+    }
+
+    private static void ticket() {
+        if (!Bridge.get().available()) return;
+        Assets.WORKER.execute(() -> {
+            try {
+                JsonObject t = Bridge.get().call("POST", "/ticket", new JsonObject(), Duration.ofSeconds(15));
+                JsonObject m = new JsonObject();
+                m.addProperty("t", "ticket");
+                m.addProperty("ticket", Json.text(t, "ticket", ""));
+                Minecraft.getInstance().execute(() -> send(m));
+            } catch (Exception e) {
+                Assets.LOG.warn("El launcher no pudo dar el pase de la partida: {}", e.getMessage());
+            }
         });
     }
 
@@ -113,7 +118,7 @@ final class Net {
 
     private static void send(JsonObject m) {
         try {
-            if (joined && ClientPlayNetworking.canSend(Message.TYPE)) ClientPlayNetworking.send(new Message(m.toString()));
+            if (joined && Minecraft.getInstance().getConnection() != null) ClientPlayNetworking.send(new Message(m.toString()));
         } catch (IllegalStateException e) {
             Assets.LOG.warn("No se pudo avisar al servidor: {}", e.getMessage());
         }
@@ -128,6 +133,7 @@ final class Net {
         }
         String type = Json.text(m, "t", "");
         if (type.equals("hello") && Json.bool(m, "autoAccept")) accept();
+        if (type.equals("hello") && Json.bool(m, "ticket")) ticket();
         if (type.equals("update")) Assets.update(Json.text(m, "assets", ""));
     }
 

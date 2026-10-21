@@ -29,14 +29,19 @@ function join(username, { mod = null } = {}) {
     if (mod) {
       bot._client.once('login', () => {
         bot._client.registerChannel(CHANNEL, ['restBuffer', []], true);
-        bot._client.on(CHANNEL, (buf) => { try { s.mod.push(JSON.parse(Buffer.from(buf).toString('utf8'))); } catch {} });
+        bot._client.on(CHANNEL, (buf) => {
+          let m;
+          try { m = JSON.parse(Buffer.from(buf).toString('utf8')); } catch { return; }
+          s.mod.push(m);
+          if (m.t === 'hello' && m.ticket && mod.ticket) s.send({ t: 'ticket', ticket: mod.ticket });
+        });
       });
     }
     bot.on('message', (m) => s.messages.push(m.toString()));
     bot.on('kicked', (reason) => { s.kicked = text(reason); });
     bot.on('end', () => { s.ended = true; });
     bot.once('spawn', () => {
-      if (mod) setTimeout(() => s.send({ t: 'hello', v: 1, mod: 'prueba', ...mod }), 300);
+      if (mod) setTimeout(() => s.send({ t: 'hello', v: 1, mod: 'prueba', launcher: mod.launcher, assets: mod.assets }), 300);
       resolve(s);
     });
     bot.once('error', reject);
@@ -95,6 +100,7 @@ check(String(no.kicked || '').includes('Necesitas'), `con el mensaje de config.y
 const modded = await join('Mod_Launcher', { mod: { launcher: true, assets: first.assets, ticket: 'pase-Mod_Launcher' } });
 check(await until(() => modded.mod.some((m) => m.t === 'hello'), 8000), 'el plugin contesta al mod');
 check(modded.mod.find((m) => m.t === 'hello')?.autoAccept === true, 'y le dice que acepte los packs solo (required: true)');
+check(modded.mod.find((m) => m.t === 'hello')?.ticket === false, 'sin «solo con el launcher» no pide el pase');
 await wait(5000);
 check(modded.packs.length === 0, 'el mod con el launcher al día no recibe el pack del servidor');
 check(!modded.mod.some((m) => m.t === 'update'), 'ni tiene que actualizar nada');
@@ -141,7 +147,8 @@ await leave(good, heart);
 const log = JSON.parse(fs.readFileSync(calls, 'utf8'));
 check(log.length > 0 && log.filter((c) => c.path === '/v1/rp/prueba').every((c) => c.auth), 'todas las consultas llevan la clave');
 check(['Launcher_Al_Dia', 'Jugador_Normal'].every((n) => log.some((c) => c.nick === n)), 'se pregunta por cada jugador al entrar');
-check(log.some((c) => c.nick === 'Mod_Ticket' && c.ticket === 'pase-Mod_Ticket'), 'el pase del mod se comprueba con la API');
+check(log.some((c) => c.nick === 'Mod_Ticket' && c.ticket === 'pase-Mod_Ticket'), 'con «solo con el launcher» el plugin pide el pase y lo comprueba con la API');
+check(!log.some((c) => c.nick === 'Mod_Launcher' && c.ticket), 'sin «solo con el launcher» el pase no sale del PC');
 
 if (failures.length) {
   console.error(`\n${failures.length} comprobación(es) fallaron`);

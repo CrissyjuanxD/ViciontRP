@@ -63,13 +63,12 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
     private static final class Client {
         final boolean launcher;
         volatile String assets;
-        final String ticket;
+        volatile String ticket;
         volatile Boolean verified;
 
-        Client(boolean launcher, String assets, String ticket) {
+        Client(boolean launcher, String assets) {
             this.launcher = launcher;
             this.assets = assets;
-            this.ticket = ticket;
         }
     }
 
@@ -378,41 +377,48 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
         }
         String type = text(m, "t");
         if ("hello".equals(type)) hello(p, m);
+        else if ("ticket".equals(type)) ticket(p, m);
         else if ("status".equals(type)) status(p, m);
     }
 
     private void hello(Player p, JsonObject m) {
         UUID id = p.getUniqueId();
-        Client c = new Client(bool(m, "launcher"), sha1(text(m, "assets")), text(m, "ticket"));
+        Client c = new Client(bool(m, "launcher"), sha1(text(m, "assets")));
         clients.put(id, c);
         JsonObject ack = new JsonObject();
         ack.addProperty("t", "hello");
         ack.addProperty("v", 1);
         ack.addProperty("autoAccept", required());
+        ack.addProperty("ticket", launcherOnly() && c.launcher);
         send(p, ack);
-        if (c.ticket != null && api.instance != null) {
-            String name = p.getName();
-            getServer().getScheduler().runTaskAsynchronously(this, () -> {
-                try {
-                    Api.Info i = api.fetch(name, c.ticket, Duration.ofSeconds(8));
-                    c.verified = Boolean.TRUE.equals(i.ticket);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } catch (IOException e) {
-                    fail(e);
-                }
-                if (Boolean.FALSE.equals(c.verified) && launcherOnly()) {
-                    getServer().getScheduler().runTask(this, () -> {
-                        if (p.isOnline() && !p.hasPermission("viciontrp.bypass") && !proven(p)) deny(p);
-                    });
-                }
-            });
-        }
         BukkitTask w = waiting.remove(id);
         if (w != null) {
             w.cancel();
             decide(p);
         }
+    }
+
+    private void ticket(Player p, JsonObject m) {
+        Client c = clients.get(p.getUniqueId());
+        String ticket = text(m, "ticket");
+        if (c == null || c.ticket != null || ticket == null || ticket.isEmpty() || api.instance == null) return;
+        c.ticket = ticket;
+        String name = p.getName();
+        getServer().getScheduler().runTaskAsynchronously(this, () -> {
+            try {
+                Api.Info i = api.fetch(name, c.ticket, Duration.ofSeconds(8));
+                c.verified = Boolean.TRUE.equals(i.ticket);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (IOException e) {
+                fail(e);
+            }
+            if (Boolean.FALSE.equals(c.verified) && launcherOnly()) {
+                getServer().getScheduler().runTask(this, () -> {
+                    if (p.isOnline() && !p.hasPermission("viciontrp.bypass") && !proven(p)) deny(p);
+                });
+            }
+        });
     }
 
     private void status(Player p, JsonObject m) {

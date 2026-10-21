@@ -81,18 +81,17 @@ const pack = (description) => zip({
 async function shot(name) {
   const dir = path.join(RUN, 'screenshots');
   const before = new Set(fs.existsSync(dir) ? fs.readdirSync(dir) : []);
+  const appeared = () => fs.existsSync(dir) && fs.readdirSync(dir).some((f) => !before.has(f));
+  let win = '';
   try {
-    execFileSync('xdotool', ['mousemove', '640', '360']);
-    try {
-      const win = execFileSync('xdotool', ['search', '--onlyvisible', '--name', '.'], { encoding: 'utf8' }).trim().split(/\s+/).pop();
-      if (win) execFileSync('xdotool', ['windowfocus', win]);
-    } catch {}
-    execFileSync('xdotool', ['key', 'F2']);
-  } catch (e) {
-    console.log(`No se pudo hacer la captura ${name}: ${e.message}`);
-    return;
+    win = execFileSync('xdotool', ['search', '--onlyvisible', '--class', 'Minecraft|java'], { encoding: 'utf8' }).trim().split(/\s+/).pop();
+  } catch {}
+  for (const args of [win ? ['windowactivate', '--sync', win, 'key', 'F2'] : null, ['mousemove', '640', '360', 'key', 'F2'], win ? ['key', '--window', win, 'F2'] : null]) {
+    if (!args) continue;
+    try { execFileSync('xdotool', args, { timeout: 10000 }); } catch (e) { console.log(`xdotool ${args[0]}: ${e.message.split('\n')[0]}`); }
+    if (await until(appeared, 4000, 200)) break;
   }
-  const ok = await until(() => fs.existsSync(dir) && fs.readdirSync(dir).some((f) => !before.has(f)), 10000, 200);
+  const ok = await until(appeared, 4000, 200);
   if (!ok) { console.log(`La captura ${name} no apareció`); return; }
   await wait(1000);
   const file = fs.readdirSync(dir).find((f) => !before.has(f));
@@ -107,6 +106,11 @@ fs.writeFileSync(path.join(RUN, 'options.txt'), [
   'onboardAccessibility:false', 'skipMultiplayerWarning:true', 'joinedFirstServer:true', 'tutorialStep:none', 'pauseOnLostFocus:false',
   'renderDistance:2', 'simulationDistance:5', 'soundCategory_master:0.0', 'resourcePacks:["vanilla","file/Base.zip"]', '',
 ].join('\n'));
+
+const configFile = path.join(dir, 'plugins', 'ViciontRP', 'config.yml');
+fs.writeFileSync(configFile, fs.readFileSync(configFile, 'utf8').replace(/^access: .*$/m, 'access: launcher-only'));
+fs.appendFileSync(path.join(dir, 'console'), 'viciontrp reload\n');
+await until(() => serverLog().includes('solo se puede entrar con el launcher'), 20000);
 
 const first = await api('/__state');
 const token = crypto.randomBytes(24).toString('hex');
@@ -166,7 +170,8 @@ try {
   const joined = await until(() => exited !== null || serverLog().includes(`${NICK} juega desde el launcher con los recursos al día`), 20 * 60000, 2000);
   check(joined && exited === null, 'el cliente con el mod entra al servidor y el plugin sabe que tiene los recursos al día');
   if (!joined || exited !== null) throw new Error('El cliente no llegó a entrar');
-  check(events.some((e) => e.route === 'GET /hello') && events.some((e) => e.route === 'POST /ticket'), 'el mod saluda al launcher y le pide el pase');
+  check(events.some((e) => e.route === 'GET /hello'), 'el mod saluda al launcher');
+  check(await until(() => events.some((e) => e.route === 'POST /ticket'), 15000), 'con «solo con el launcher», el plugin le pide el pase y el mod se lo pide al launcher');
   check(/ViciontRP 1\.\d+\.\d+ listo \(con el launcher de Viciont Studios\)/.test(clientLog()), 'el mod arranca y encuentra el launcher');
   await wait(8000);
   await shot('1-dentro');
@@ -188,6 +193,7 @@ try {
   check(log.includes('Assets actualizados'), 'el mod termina la actualización');
   check(!/InvalidInjectionException|Mixin apply failed|viciontrp.*Exception/i.test(log), 'sin errores del mod en el registro del juego');
   check(!serverLog().includes('no pudo actualizar los recursos'), 'el plugin no tuvo que mandar el pack del servidor');
+  check(!serverLog().includes(`${NICK} intentó entrar sin el launcher`), 'y no lo echa por «solo con el launcher»');
 } catch (e) {
   check(false, e.message);
 } finally {
