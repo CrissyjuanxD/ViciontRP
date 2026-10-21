@@ -89,7 +89,10 @@ final class Net {
                 }
             }
             m.addProperty("launcher", launcher);
-            Minecraft.getInstance().execute(() -> send(m));
+            Minecraft.getInstance().execute(() -> {
+                send(m);
+                Assets.LOG.info("Saludo enviado al servidor");
+            });
         });
     }
 

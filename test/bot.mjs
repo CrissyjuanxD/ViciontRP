@@ -72,12 +72,12 @@ const leave = async (...list) => { for (const s of list) s.bot.quit(); await wai
 const first = await api('/__state');
 
 const fresh = await join('Launcher_Al_Dia');
-await wait(6000);
+await wait(10000);
 check(fresh.packs.length === 0, 'quien juega desde el launcher con el pack al día no recibe nada');
 await leave(fresh);
 
 const old = await join('Launcher_Viejo');
-check(await until(() => old.packs.length === 2, 10000), 'quien tiene la instancia sin actualizar recibe los dos packs');
+check(await until(() => old.packs.length === 2, 15000), 'quien tiene la instancia sin actualizar (y no tiene el mod) recibe los dos packs');
 await leave(old);
 
 const normal = await join('Jugador_Normal');

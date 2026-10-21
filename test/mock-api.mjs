@@ -4,7 +4,7 @@ import fs from 'node:fs';
 
 const KEY = 'vrp1.prueba.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const sha1 = (b) => crypto.createHash('sha1').update(b).digest('hex');
-const players = { Launcher_Al_Dia: { launcher: true, current: true }, Launcher_Viejo: { launcher: true, current: false } };
+const players = { Launcher_Al_Dia: { launcher: true, current: true }, Launcher_Viejo: { launcher: true, current: false }, Mod_Cliente: { launcher: true, current: true } };
 const log = [];
 const state = { gen: 1 };
 const served = new Map();

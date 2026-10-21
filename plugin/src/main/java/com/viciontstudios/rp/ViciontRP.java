@@ -325,7 +325,7 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
         long delay = Math.max(0, getConfig().getLong("join-delay-ticks", 20));
         getServer().getScheduler().runTaskLater(this, () -> {
             if (!p.isOnline() || waiting.containsKey(id)) return;
-            if (clients.containsKey(id) || !p.getListeningPluginChannels().contains(CHANNEL)) {
+            if (clients.containsKey(id) || !(l.launcher || p.getListeningPluginChannels().contains(CHANNEL))) {
                 decide(p);
                 return;
             }
@@ -385,6 +385,7 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
         UUID id = p.getUniqueId();
         Client c = new Client(bool(m, "launcher"), sha1(text(m, "assets")));
         clients.put(id, c);
+        getLogger().info(p.getName() + " tiene el mod ViciontRP" + (c.launcher ? " y juega desde el launcher." : " (sin el launcher)."));
         JsonObject ack = new JsonObject();
         ack.addProperty("t", "hello");
         ack.addProperty("v", 1);

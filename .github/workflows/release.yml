@@ -66,5 +66,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           v="${GITHUB_REF_NAME#v}"
-          node mod/index.mjs "$v" "$GITHUB_REF_NAME" jars mod.json
-          gh release create "$GITHUB_REF_NAME" "plugin/target/ViciontRP-$v.jar" jars/*.jar mod.json --title "ViciontRP $v" --notes-file "docs/releases/$v.md"
+          mapfile -t mods < <(node mod/index.mjs "$v" "$GITHUB_REF_NAME" jars mod.json)
+          gh release create "$GITHUB_REF_NAME" "plugin/target/ViciontRP-$v.jar" "${mods[@]}" mod.json --title "ViciontRP $v" --notes-file "docs/releases/$v.md"

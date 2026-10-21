@@ -8,6 +8,7 @@ const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'versions');
 const files = [];
 for (const name of fs.readdirSync(dir).filter((n) => n.endsWith('.properties')).sort()) {
   const props = Object.fromEntries(fs.readFileSync(path.join(dir, name), 'utf8').split(/\r?\n/).filter((l) => l.includes('=')).map((l) => l.split(/=(.*)/s).slice(0, 2)));
+  if (props.release === 'false') continue;
   const target = name.replace(/\.properties$/, '');
   const file = `ViciontRP-mod-${target}-${version}.jar`;
   const body = fs.readFileSync(path.join(jars, file));
@@ -18,4 +19,4 @@ for (const name of fs.readdirSync(dir).filter((n) => n.endsWith('.properties')).
   });
 }
 fs.writeFileSync(out, `${JSON.stringify({ version, files }, null, 2)}\n`);
-console.log(`mod.json: ${files.length} versiones`);
+console.log(files.map((f) => path.join(jars, f.file)).join('\n'));

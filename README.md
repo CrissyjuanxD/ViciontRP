@@ -13,7 +13,7 @@ Plugin para servidores de Minecraft (Paper, Purpur o Spigot) y mod para Fabric q
 
 - Paper, Purpur o Spigot **1.18 o más nuevo** (probado en 1.21.4 y 26.3). Para mandar **varios packs** y actualizar a quien ya está jugando hace falta la 1.20.3 o más nueva.
 - Una instancia publicada con Viciont Studios Launcher (1.5.2 o más nuevo) y el permiso **Editar y publicar** en ella.
-- Para actualizar sin salir del servidor desde el launcher: instancia **Fabric o Quilt** de Minecraft **1.21 a 26.3**. El launcher pone el mod ViciontRP él solo.
+- Para actualizar sin salir del servidor desde el launcher: instancia **Fabric o Quilt** de Minecraft **1.21, 1.21.1, 1.21.11 o 26.2** (las demás versiones llegarán más adelante). El launcher pone el mod ViciontRP él solo.
 
 ## Instalación
 
@@ -75,7 +75,7 @@ Si no se puede conectar con el servidor de Viciont Studios, el plugin manda los 
 
 El mod ViciontRP es solo de cliente y no hace nada sin el plugin. Habla con el plugin por el canal `viciontrp:main` y con el launcher por un canal privado del propio PC (`127.0.0.1`, con una clave distinta en cada partida). Los archivos de la carpeta `resourcepacks` los cambia siempre el launcher, en el momento de la recarga en que el juego ya ha soltado los packs (por eso funciona también con `.zip` en Windows).
 
-Hay un `.jar` por grupo de versiones de Minecraft (de la 1.21 a la 26.3) y el launcher elige el correcto con el `mod.json` de cada release. Si alguien lo instala sin el launcher, solo acepta los packs del servidor sin preguntar.
+Hay un `.jar` por grupo de versiones de Minecraft (por ahora 1.21–1.21.1, 1.21.11 y 26.2; el resto está en `mod/versions/` con `release=false` hasta probarlo en el juego) y el launcher elige el correcto con el `mod.json` de cada release. Si alguien lo instala sin el launcher, solo acepta los packs del servidor sin preguntar.
 
 ## Compilar
 
