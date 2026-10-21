@@ -1,0 +1,19 @@
+name: ViciontRP
+version: '${project.version}'
+main: com.viciontstudios.rp.ViciontRP
+api-version: '1.18'
+author: CrissyjuanxD
+website: https://github.com/CrissyjuanxD/ViciontRP
+description: Reparte los packs de recursos de tu instancia de Viciont Studios Launcher y los actualiza sin salir del servidor.
+commands:
+  viciontrp:
+    description: Estado, actualización y recarga de ViciontRP
+    usage: /viciontrp <status|actualizar [ahora]|reload>
+    permission: viciontrp.admin
+permissions:
+  viciontrp.admin:
+    description: Usar /viciontrp
+    default: op
+  viciontrp.bypass:
+    description: Nunca recibe los packs del servidor ni necesita el launcher
+    default: false

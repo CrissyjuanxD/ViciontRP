@@ -1,0 +1,78 @@
+plugins {
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" apply false
+	id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+}
+
+def target = providers.gradleProperty('target').get()
+def props = new Properties()
+file("versions/${target}.properties").withInputStream { props.load(it) }
+def mc = props.getProperty('minecraft_version')
+def obfuscated = !(mc ==~ /^2\d\..*/)
+def javaVersion = props.getProperty('java') as int
+
+apply plugin: obfuscated ? 'net.fabricmc.fabric-loom-remap' : 'net.fabricmc.fabric-loom'
+
+base {
+	archivesName = "ViciontRP-mod-${target}"
+}
+
+def shared = props.getProperty('sources', '')
+sourceSets {
+	main {
+		java {
+			shared.split(',').findAll { it }.each { srcDir "src/${it}/java" }
+		}
+	}
+}
+
+loom {
+	runs {
+		client {
+			runDir = providers.gradleProperty('runDir').getOrElse('run')
+			def extra = providers.gradleProperty('clientArgs').getOrNull()
+			if (extra) programArgs(extra.split(' ').findAll { it })
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${mc}"
+	if (obfuscated) {
+		mappings loom.officialMojangMappings()
+		modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+		['fabric-api-base', 'fabric-networking-api-v1'].each {
+			include modImplementation(fabricApi.module(it, props.getProperty('fabric_api_version')))
+		}
+	} else {
+		implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+		['fabric-api-base', 'fabric-networking-api-v1'].each {
+			include implementation(fabricApi.module(it, props.getProperty('fabric_api_version')))
+		}
+	}
+}
+
+processResources {
+	def min = props.getProperty('min')
+	def max = props.getProperty('max')
+	def values = [version: project.version, mc_range: min == max ? min : ">=${min} <=${max}".toString(), java: javaVersion]
+	inputs.properties values
+	filesMatching(['fabric.mod.json', '*.mixins.json']) {
+		expand values
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = javaVersion
+	it.options.encoding = 'UTF-8'
+}
+
+java {
+	sourceCompatibility = JavaVersion.toVersion(javaVersion)
+	targetCompatibility = JavaVersion.toVersion(javaVersion)
+}
+
+jar {
+	from(rootProject.file('../LICENSE')) {
+		rename { "LICENSE_ViciontRP" }
+	}
+}
