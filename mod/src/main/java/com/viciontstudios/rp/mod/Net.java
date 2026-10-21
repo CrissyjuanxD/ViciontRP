@@ -37,7 +37,6 @@ final class Net {
         }
     }
 
-    private static volatile boolean greeted;
     private static volatile boolean joined;
     private static ServerData accepted;
     private static ServerData.ServerPackStatus before;
@@ -48,19 +47,15 @@ final class Net {
     static void init() {
         Channels.register(Message.TYPE, Message.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(Message.TYPE, (payload, context) -> receive(payload.json()));
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> client.execute(() -> {
+            reset();
             joined = true;
-            client.execute(Net::greet);
-        });
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(Net::reset));
-    }
-
-    private static void greet() {
-        if (joined && !greeted) hello();
+            hello();
+        }));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> reset());
     }
 
     private static void reset() {
-        greeted = false;
         joined = false;
         Assets.cancel();
         if (accepted != null && before != null) accepted.setResourcePackStatus(before);
@@ -69,7 +64,6 @@ final class Net {
     }
 
     private static void hello() {
-        greeted = true;
         Assets.WORKER.execute(() -> {
             JsonObject m = new JsonObject();
             m.addProperty("t", "hello");
