@@ -38,6 +38,8 @@ final class Net {
     }
 
     private static volatile boolean greeted;
+    private static volatile boolean joined;
+    private static volatile boolean listening;
     private static ServerData accepted;
     private static ServerData.ServerPackStatus before;
 
@@ -48,16 +50,26 @@ final class Net {
         Channels.register(Message.TYPE, Message.CODEC);
         ClientPlayNetworking.registerGlobalReceiver(Message.TYPE, (payload, context) -> receive(payload.json()));
         Channels.onServerChannels(channels -> {
-            if (!greeted && channels.contains(Message.TYPE.id())) hello();
+            if (!channels.contains(Message.TYPE.id())) return;
+            listening = true;
+            Minecraft.getInstance().execute(Net::greet);
         });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            if (!greeted && ClientPlayNetworking.canSend(Message.TYPE)) hello();
+            joined = true;
+            if (ClientPlayNetworking.canSend(Message.TYPE)) listening = true;
+            client.execute(Net::greet);
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(Net::reset));
     }
 
+    private static void greet() {
+        if (joined && listening && !greeted) hello();
+    }
+
     private static void reset() {
         greeted = false;
+        joined = false;
+        listening = false;
         Assets.cancel();
         if (accepted != null && before != null) accepted.setResourcePackStatus(before);
         accepted = null;
@@ -100,8 +112,11 @@ final class Net {
     }
 
     private static void send(JsonObject m) {
-        if (Minecraft.getInstance().getConnection() == null || !ClientPlayNetworking.canSend(Message.TYPE)) return;
-        ClientPlayNetworking.send(new Message(m.toString()));
+        try {
+            if (joined && ClientPlayNetworking.canSend(Message.TYPE)) ClientPlayNetworking.send(new Message(m.toString()));
+        } catch (IllegalStateException e) {
+            Assets.LOG.warn("No se pudo avisar al servidor: {}", e.getMessage());
+        }
     }
 
     private static void receive(String json) {

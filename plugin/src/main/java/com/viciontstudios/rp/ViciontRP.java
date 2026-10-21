@@ -42,7 +42,7 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
     private static final String DEFAULT_API = "https://viciont-launcher.pepoavilesg26.workers.dev";
     private static final Set<String> BAD = Set.of("DECLINED", "FAILED_DOWNLOAD", "INVALID_URL", "FAILED_RELOAD");
     private static final Pattern HEX = Pattern.compile("&#([0-9a-fA-F]{6})");
-    private static final long HELLO_WAIT_TICKS = 100;
+    private static final long HELLO_WAIT_TICKS = 160;
     private static final long PROOF_TICKS = 300;
     private static final String PURPLE = "&#C8A2F8";
     private static final String PINK = "&#F8B4D9";

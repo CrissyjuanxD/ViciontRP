@@ -82,8 +82,11 @@ async function shot(name) {
   const dir = path.join(RUN, 'screenshots');
   const before = new Set(fs.existsSync(dir) ? fs.readdirSync(dir) : []);
   try {
-    const win = execFileSync('xdotool', ['search', '--name', 'Minecraft'], { encoding: 'utf8' }).trim().split(/\s+/).pop();
-    execFileSync('xdotool', ['windowfocus', win]);
+    execFileSync('xdotool', ['mousemove', '640', '360']);
+    try {
+      const win = execFileSync('xdotool', ['search', '--onlyvisible', '--name', '.'], { encoding: 'utf8' }).trim().split(/\s+/).pop();
+      if (win) execFileSync('xdotool', ['windowfocus', win]);
+    } catch {}
     execFileSync('xdotool', ['key', 'F2']);
   } catch (e) {
     console.log(`No se pudo hacer la captura ${name}: ${e.message}`);
