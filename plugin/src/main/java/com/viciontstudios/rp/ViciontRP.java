@@ -62,7 +62,7 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
 
     private static final class Client {
         final boolean launcher;
-        final String assets;
+        volatile String assets;
         final String ticket;
         volatile Boolean verified;
 
@@ -78,7 +78,7 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
     private final Map<UUID, Map<UUID, String>> given = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> waiting = new ConcurrentHashMap<>();
     private final Set<UUID> greeted = ConcurrentHashMap.newKeySet();
-    private final Set<UUID> updating = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, String> updating = new ConcurrentHashMap<>();
     private volatile Api api;
     private volatile Api.Info info;
     private volatile String shownKey;
@@ -244,7 +244,7 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
     }
 
     private void update(Player p, Api.Info now) {
-        updating.add(p.getUniqueId());
+        updating.put(p.getUniqueId(), now.assets == null ? "" : now.assets);
         JsonObject m = new JsonObject();
         m.addProperty("t", "update");
         m.addProperty("assets", now.assets == null ? "" : now.assets);
@@ -417,8 +417,11 @@ public final class ViciontRP extends JavaPlugin implements Listener, PluginMessa
 
     private void status(Player p, JsonObject m) {
         String s = text(m, "s");
-        if (!updating.remove(p.getUniqueId())) return;
+        String target = updating.remove(p.getUniqueId());
+        if (target == null) return;
         if ("done".equals(s) || "nothing".equals(s)) {
+            Client c = clients.get(p.getUniqueId());
+            if (c != null && !target.isEmpty()) c.assets = target;
             getLogger().info(p.getName() + ": recursos actualizados desde el launcher.");
             return;
         }
