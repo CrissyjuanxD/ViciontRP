@@ -6,3 +6,8 @@ test/package-lock.json
 server-*.log
 screens-*/
 client-*.log
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
