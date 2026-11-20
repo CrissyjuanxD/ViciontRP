@@ -1,6 +1,6 @@
 # ViciontRP
 
-> [!IMPORTANTE]
+> [!IMPORTANT]
 > **Herramienta administrativa de Viciont Studios.** ViciontRP solo funciona junto con [Viciont Studios Launcher](https://viciontstudios.pages.dev/#launcher): el plugin necesita una clave que solo puede crear un administrador de la instancia (permiso **Editar y publicar**), y el mod lo instala el propio launcher. Si lo descargas sin eso, no hace nada.
 >
 > El código es público porque el launcher descarga el mod desde las [Releases](https://github.com/CrissyjuanxD/ViciontRP/releases) de este repositorio.
