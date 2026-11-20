@@ -85,3 +85,7 @@ cd mod && ./gradlew -Ptarget=1.21.1 build
 ```
 
 El plugin queda en `plugin/target/` y el mod en `mod/build/libs/` (los objetivos están en `mod/versions/`). Cada versión se publica sola al subir una etiqueta `vX.Y.Z` (con sus notas en `docs/releases/X.Y.Z.md`): el plugin, los `.jar` del mod y `mod.json`.
+
+## Licencia
+
+ViciontRP es propiedad de CrissyjuanxD / Viciont Studios. Consulta las condiciones de uso en [LICENSE](LICENSE).
